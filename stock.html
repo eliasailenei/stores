@@ -1,0 +1,119 @@
+<!-- stock.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Count</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: #f8f8f8;
+    }
+
+    #wrapper {
+      max-width: 100%;
+      padding: 10px;
+    }
+
+    #container {
+      text-align: center;
+      padding: 10px;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      word-wrap: break-word;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .buttons button, #toggleFlashlight, #cameraSelect {
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .buttons button:hover, #toggleFlashlight:hover {
+      background-color: #0056b3;
+    }
+
+    video {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 16/9;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      display: block;
+      margin: auto;
+    }
+
+    #cameraSelect {
+      display: block;
+      margin: 10px auto;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    #toggleFlashlight {
+      display: block;
+      margin: 10px auto;
+    }
+
+    #cameraError {
+      display: none;
+      text-align: center;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    #headingsContainer {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="container">
+      <h2>Stock count: #<span id="val">001</span> Store: <span id="store">Main</span> Date: <span id="date"></span></h2>
+
+      <div id="headingsContainer"></div>
+
+      <div class="buttons">
+        <button onclick="addHeading()">Add heading</button>
+        <button onclick="addStock()">Add Stock</button>
+        <button onclick="backToOtherStock()">Back to other stock</button>
+        <button onclick="renameStore()">Rename Store</button>
+      </div>
+    </div>
+
+    <video id="cameraFeed" autoplay playsinline></video>
+
+    <button id="toggleFlashlight">Turn On Flashlight</button>
+
+    <select id="cameraSelect"></select>
+
+    <div id="cameraError"></div>
+  </div>
+
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

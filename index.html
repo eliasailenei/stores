@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Tables Overview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    .store-list {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .store-card {
+      background: white;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .store-card div:first-child {
+      flex-grow: 1;
+      min-width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .store-card button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .store-card button:hover {
+      background-color: #0056b3;
+    }
+
+    .top-buttons {
+      text-align: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .top-buttons button {
+      margin: 5px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: none;
+      background-color: #28a745;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .top-buttons button:hover {
+      background-color: #1e7e34;
+    }
+
+    @media screen and (max-width: 600px) {
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      .store-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+
+      .store-card div:first-child {
+        margin-bottom: 10px;
+      }
+
+      .store-card button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .top-buttons button {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Saved Stock Tables</h1>
+  <div class="store-list" id="storeList"></div>
+
+  <div class="top-buttons">
+    <button onclick="createNewTable()">+ New Table</button>
+    <button onclick="deleteAllTables()">Delete All Tables</button>
+  </div>
+
+  <script>
+    const storeList = document.getElementById('storeList');
+    let data = JSON.parse(localStorage.getItem('stockAppData')) || { stores: [] };
+
+    function renderStores() {
+      storeList.innerHTML = '';
+      data.stores.forEach((store, index) => {
+        const div = document.createElement('div');
+        div.className = 'store-card';
+        div.innerHTML = `
+          <div>
+            <span>#${store.id}</span> - ${store.name || 'Unnamed'}
+          </div>
+          <button onclick="loadStore(${index})">Open</button>
+          <button onclick="exportCSV(${index})">Export CSV</button>
+          <button onclick="deleteStore(${index})">Delete</button>
+        `;
+        storeList.appendChild(div);
+      });
+    }
+
+    renderStores();
+
+    function loadStore(index) {
+      localStorage.setItem('stockAppSelectedIndex', index);
+      location.href = 'stock.html';
+    }
+
+    function createNewTable() {
+      localStorage.removeItem('stockAppSelectedIndex');
+      location.href = 'stock.html';
+    }
+
+    function deleteStore(index) {
+      if (confirm(`Are you sure you want to delete store #${data.stores[index].id}?`)) {
+        data.stores.splice(index, 1);
+        localStorage.setItem('stockAppData', JSON.stringify(data));
+        renderStores();
+      }
+    }
+
+    function deleteAllTables() {
+      const confirmText = prompt('Type DELETE TABLES to confirm:');
+      if (confirmText === 'DELETE TABLES') {
+        localStorage.removeItem('stockAppData');
+        data = { stores: [] };
+        renderStores();
+        alert('All tables deleted.');
+      } else {
+        alert('Confirmation failed. No tables deleted.');
+      }
+    }
+
+    function exportCSV(index) {
+      const store = data.stores[index];
+      let csvContent = `Section,Number,Quantity\n`;
+
+      store.sections.forEach(section => {
+        section.items.forEach(item => {
+          csvContent += `"${section.title}","${item.number}","${item.qty}"\n`;
+        });
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Store_${store.id}_${store.name || 'Unnamed'}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
