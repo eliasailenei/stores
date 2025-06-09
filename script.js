@@ -1,4 +1,5 @@
 document.getElementById('date').innerText = new Date().toLocaleDateString('en-GB');
+document.getElementById('toggleCamera').innerText = 'Turn Off Camera';
 
 let sectionCount = 0;
 let activeSection = null;
@@ -402,4 +403,24 @@ function toggleTorch(track) {
 initStore();
 listCameras();
 
+let cameraOn = true;
+
+document.getElementById('toggleCamera').addEventListener('click', () => {
+  if (cameraOn) {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+    if (Quagga.initialized) {
+      Quagga.stop();
+      Quagga.initialized = false;
+    }
+    document.getElementById('toggleCamera').innerText = 'Turn On Camera';
+    cameraOn = false;
+  } else {
+    resetCamera(true);
+    document.getElementById('toggleCamera').innerText = 'Turn Off Camera';
+    cameraOn = true;
+  }
+});
 // Hook flashlight button
