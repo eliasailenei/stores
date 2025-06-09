@@ -160,15 +160,22 @@ function backToOtherStock() {
 }
 
 // Handle barcode addition
-function addStockWithBarcode(barcode) {
+async function addStockWithBarcode(barcode) {
   if (!activeSection) {
     alert("Click inside a section first.");
     return;
   }
 
+  // 🔴 Stop current camera stream before blocking prompt
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+  }
+
+  // 📦 Prompt for quantity
   let qty = prompt(`Enter quantity for barcode ${barcode}:`, "1");
   qty = qty && !isNaN(qty) && Number(qty) > 0 ? qty.trim() : "1";
 
+  // ➕ Add new stock row
   const row = document.createElement('tr');
 
   const numberCell = document.createElement('td');
@@ -191,6 +198,9 @@ function addStockWithBarcode(barcode) {
 
   activeSection.appendChild(row);
   autoSaveSections();
+
+  // ✅ Restart camera after prompt & input
+  await startCamera(currentCameraId);
 }
 
 
