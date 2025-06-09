@@ -39,6 +39,7 @@ function renameStore() {
     currentStore.name = newName.trim();
     document.getElementById('store').innerText = currentStore.name;
     saveToLocal();
+    resetCamera(true);
   }
 }
 
@@ -167,8 +168,17 @@ function addStockWithBarcode(barcode) {
     return;
   }
 
-  let qty = prompt(`Enter quantity for barcode ${barcode}:`, "1");
-  qty = qty && !isNaN(qty) && Number(qty) > 0 ? qty.trim() : "1";
+  // Prompt for quantity — allow anything (number or string), but cancel = skip
+  const qty = prompt(`Enter quantity for barcode ${barcode}:`);
+
+  // If user cancelled (null), exit early
+  if (qty === null) {
+    console.log(`❌ Cancelled input for barcode ${barcode}`);
+    resetCamera(true); // Still reset to keep camera alive
+    return;
+  }
+
+  const trimmedQty = qty.trim();
 
   const row = document.createElement('tr');
 
@@ -181,7 +191,7 @@ function addStockWithBarcode(barcode) {
 
   const qtyCell = document.createElement('td');
   qtyCell.contentEditable = true;
-  qtyCell.innerText = qty;
+  qtyCell.innerText = trimmedQty;
   qtyCell.addEventListener('focus', setContextSection);
   qtyCell.addEventListener('keydown', removeIfEmpty);
   qtyCell.addEventListener('input', autoSaveSections);
@@ -193,8 +203,7 @@ function addStockWithBarcode(barcode) {
   activeSection.appendChild(row);
   autoSaveSections();
 
-  // ✅ Fully restart camera & scanner
-  resetCamera(true);
+  resetCamera(true); // Restart camera & scanner
 }
 
 function resetCamera(restartScanner = true) {
