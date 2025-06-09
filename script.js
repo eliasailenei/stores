@@ -160,22 +160,15 @@ function backToOtherStock() {
 }
 
 // Handle barcode addition
-async function addStockWithBarcode(barcode) {
+function addStockWithBarcode(barcode) {
   if (!activeSection) {
     alert("Click inside a section first.");
     return;
   }
 
-  // 🔴 Stop current camera stream before blocking prompt
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
-  }
-
-  // 📦 Prompt for quantity
   let qty = prompt(`Enter quantity for barcode ${barcode}:`, "1");
   qty = qty && !isNaN(qty) && Number(qty) > 0 ? qty.trim() : "1";
 
-  // ➕ Add new stock row
   const row = document.createElement('tr');
 
   const numberCell = document.createElement('td');
@@ -199,11 +192,27 @@ async function addStockWithBarcode(barcode) {
   activeSection.appendChild(row);
   autoSaveSections();
 
-  // ✅ Restart camera after prompt & input
-  await startCamera(currentCameraId);
+  // ✅ Fully restart camera & scanner
+  resetCamera(true);
 }
 
+function resetCamera(restartScanner = true) {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
 
+  if (Quagga.initialized) {
+    Quagga.stop();
+    Quagga.initialized = false;
+  }
+
+  startCamera(currentCameraId).then(() => {
+    if (restartScanner) {
+      Quagga.onDetected(barcodeHandler);
+    }
+  });
+}
 // Barcode scanner handler
 function barcodeHandler(data) {
   const code = data.codeResult.code;
