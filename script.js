@@ -166,6 +166,9 @@ function addStockWithBarcode(barcode) {
     return;
   }
 
+  let qty = prompt(`Enter quantity for barcode ${barcode}:`, "1");
+  qty = qty && !isNaN(qty) && Number(qty) > 0 ? qty.trim() : "1";
+
   const row = document.createElement('tr');
 
   const numberCell = document.createElement('td');
@@ -177,6 +180,7 @@ function addStockWithBarcode(barcode) {
 
   const qtyCell = document.createElement('td');
   qtyCell.contentEditable = true;
+  qtyCell.innerText = qty;
   qtyCell.addEventListener('focus', setContextSection);
   qtyCell.addEventListener('keydown', removeIfEmpty);
   qtyCell.addEventListener('input', autoSaveSections);
@@ -186,8 +190,6 @@ function addStockWithBarcode(barcode) {
   row.addEventListener('input', autoSaveSections);
 
   activeSection.appendChild(row);
-
-  setTimeout(() => qtyCell.focus(), 10);
   autoSaveSections();
 }
 
