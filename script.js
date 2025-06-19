@@ -171,11 +171,12 @@ function addStockWithBarcode(barcode) {
   const qty = prompt(`Enter quantity for barcode ${barcode}:`);
   if (qty === null) {
     console.log(`❌ Cancelled input for barcode ${barcode}`);
-    resetCamera(true);
+    // Do NOT call resetCamera here
     return false;
   }
 
   const trimmedQty = qty.trim();
+
   const row = document.createElement('tr');
 
   const numberCell = document.createElement('td');
@@ -199,7 +200,7 @@ function addStockWithBarcode(barcode) {
   activeSection.appendChild(row);
   autoSaveSections();
 
-  resetCamera(true);
+  resetCamera(true); // ✅ Only restart scanner if something was actually added
   return true;
 }
 function resetCamera(restartScanner = true) {
