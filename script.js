@@ -165,21 +165,17 @@ function backToOtherStock() {
 function addStockWithBarcode(barcode) {
   if (!activeSection) {
     alert("Click inside a section first.");
-    return;
+    return false;
   }
 
-  // Prompt for quantity — allow anything (number or string), but cancel = skip
   const qty = prompt(`Enter quantity for barcode ${barcode}:`);
-
-  // If user cancelled (null), exit early
   if (qty === null) {
     console.log(`❌ Cancelled input for barcode ${barcode}`);
-    resetCamera(true); // Still reset to keep camera alive
-    return;
+    resetCamera(true);
+    return false;
   }
 
   const trimmedQty = qty.trim();
-
   const row = document.createElement('tr');
 
   const numberCell = document.createElement('td');
@@ -203,9 +199,9 @@ function addStockWithBarcode(barcode) {
   activeSection.appendChild(row);
   autoSaveSections();
 
-  resetCamera(true); // Restart camera & scanner
+  resetCamera(true);
+  return true;
 }
-
 function resetCamera(restartScanner = true) {
   if (cameraStream) {
     cameraStream.getTracks().forEach(track => track.stop());
@@ -228,6 +224,7 @@ function barcodeHandler(data) {
   const code = data.codeResult.code;
   const format = data.codeResult.format;
 
+  // Only accept Code 39 barcodes with 5–12 digits
   if (format !== "code_39") return;
   if (!code || code.length < 5 || code.length > 12 || /\D/.test(code)) return;
 
@@ -236,15 +233,20 @@ function barcodeHandler(data) {
     return cell && cell.innerText.trim() === code;
   });
 
+  Quagga.offDetected(); // Temporarily stop detection to avoid spamming
+
   if (!isDuplicate) {
     console.log(`📦 Barcode added: ${code}`);
-    addStockWithBarcode(code);
+    const success = addStockWithBarcode(code);
+
+    // Only re-enable scanner if user did not cancel
+    if (success) {
+      setTimeout(() => Quagga.onDetected(barcodeHandler), 1000);
+    }
   } else {
     console.log(`${code} is duplicate`);
+    setTimeout(() => Quagga.onDetected(barcodeHandler), 1000);
   }
-
-  Quagga.offDetected();
-  setTimeout(() => Quagga.onDetected(barcodeHandler), 1000);
 }
 
 // Start Quagga
